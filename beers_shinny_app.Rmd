@@ -3,20 +3,18 @@ title: "RShinny"
 author: "Ahmad Salama"
 date: "2023-11-06"
 output: html_document
+runtime: shiny
 ---
 
-```{r Shinny UI}
+```{r,  include=FALSE Shinny UI}
 library(tidyverse)
 library(dplyr)
 library(shiny)
 library(ggplot2)
 library(ggthemes)
 ```
-```{r init place holders}
-beers_data <- NULL
-breweries_data <- NULL
-```
-```{r create shinny APP UI}
+
+```{r,include=FALSE create shinny APP UI}
 
 
 ui <- fluidPage(
@@ -52,7 +50,7 @@ ui <- fluidPage(
 )
 ```
 
-```{r create Shinny APP Server}
+```{r, include=FALSE create Shinny APP Server}
 server <- function(input, output, session) {
   beers_data <- reactive({
     req(input$beers_data)
@@ -187,7 +185,7 @@ server <- function(input, output, session) {
 }
 ```
 
-```{r create shinny app objects from UI/Server pair}
+```{r, include=FALSE create shinny app objects from UI/Server pair }
 shinyApp(ui, server)
 ```
 
