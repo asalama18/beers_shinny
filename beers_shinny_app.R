@@ -1,21 +1,9 @@
----
-title: "RShinny"
-author: "Ahmad Salama"
-date: "2023-11-06"
-output: html_document
-runtime: shiny
----
 
-```{r, include=FALSE Shinny UI}
 library(tidyverse)
 library(dplyr)
 library(shiny)
 library(ggplot2)
 library(ggthemes)
-```
-
-```{r create shinny APP UI}
-
 
 ui <- fluidPage(
   titlePanel("Beers Data Analysis"),
@@ -29,13 +17,13 @@ ui <- fluidPage(
       tags$div(
         tags$line("IBU vs ABV Scatter Plot Configuration:"),
         style = "text-align: left; font-style: bold;"),
-        tags$div(
+      tags$div(
         selectInput("style_filter", "Filter by Style(s)", choices = NULL,
                     selected = NULL, multiple = TRUE),
         selectInput("state_filter", "Filter by States(s)", choices = NULL,
                     selected = NULL, multiple = TRUE),
         checkboxInput("add_regression_line", "Add Regression Line", FALSE)
-        )
+      )
       
     ),
     
@@ -48,9 +36,7 @@ ui <- fluidPage(
     )
   )
 )
-```
 
-```{r create Shinny APP Server}
 server <- function(input, output, session) {
   beers_data <- reactive({
     req(input$beers_data)
@@ -61,15 +47,15 @@ server <- function(input, output, session) {
     read.csv(infile$datapath)
   })
   
-   breweries_data <- reactive({
+  breweries_data <- reactive({
     req(input$breweries_data)
     breweries_infile <- input$breweries_data
     if (is.null(breweries_infile)) {
       return(NULL)
     }
     read.csv(breweries_infile$datapath)
-   })
-   
+  })
+  
   # Observe the beers file upload and update selectInput choices
   observeEvent(input$beers_data, {
     updateSelectInput(session, "style_filter", choices = unique(beers_data()$Style))
@@ -79,8 +65,8 @@ server <- function(input, output, session) {
   observeEvent(input$breweries_data, {
     updateSelectInput(session, "state_filter", choices = unique(breweries_data()$State))
   })
-   
-   beer_breweries <- reactive({
+  
+  beer_breweries <- reactive({
     #Merge beer data with the breweries data. 
     merged_data <- left_join(beers_data(), breweries_data(), by = c("Brewery_id" = "Brew_ID"))
     # change column names for clarity:
@@ -88,20 +74,20 @@ server <- function(input, output, session) {
     colnames(merged_data)[colnames(merged_data) == "Name.y"] <- "Brewery_Name"
     return(merged_data)
   })
- 
+  
   filtered_data <- reactive({
     if(!is.null(input$style_filter)) {
       filtered_data <- beer_breweries() %>%
         filter(Style %in% input$style_filter)
-      } 
+    } 
     else if(!is.null(input$state_filter)) {
       filtered_data <- beer_breweries() %>%
         filter(State %in% input$state_filter)
-      }
+    }
     else {
       filtered_data <- beer_breweries()
-      }
-    })
+    }
+  })
   
   output$ibu_plot <- renderPlot({
     #create ggplot object for IBU Analysis
@@ -113,40 +99,40 @@ server <- function(input, output, session) {
     # customize ggplot object based on selected plot type
     if (input$ibu_plot_type == "Histogram") {
       beer_breweries() %>%
-      ggplot(mapping = aes(IBU)) +
-      geom_histogram() +
-      xlab("IBU") +
-      ylab("Count") +
-      ggtitle("IBU Analysis") +
-      theme_economist()
+        ggplot(mapping = aes(IBU)) +
+        geom_histogram() +
+        xlab("IBU") +
+        ylab("Count") +
+        ggtitle("IBU Analysis") +
+        theme_economist()
     } else {
       beer_breweries() %>%
-      ggplot(mapping = aes(IBU)) +
-      geom_boxplot() +
-      xlab("IBU") +
-      ylab("") +
-      ggtitle("IBU Analysis") +
-      theme_economist()
+        ggplot(mapping = aes(IBU)) +
+        geom_boxplot() +
+        xlab("IBU") +
+        ylab("") +
+        ggtitle("IBU Analysis") +
+        theme_economist()
     }
   })
   
   output$abv_plot <- renderPlot({
     if (input$abv_plot_type == "Histogram") {
       beer_breweries() %>%
-      ggplot(mapping = aes(ABV)) +
-      geom_histogram() +
-      xlab("ABV") +
-      ylab("Count") +
-      ggtitle("ABV Analysis") +
-      theme_economist()
+        ggplot(mapping = aes(ABV)) +
+        geom_histogram() +
+        xlab("ABV") +
+        ylab("Count") +
+        ggtitle("ABV Analysis") +
+        theme_economist()
     } else {
       beer_breweries() %>%
-      ggplot(mapping = aes(ABV)) +
-      geom_boxplot() +
-      xlab("ABV") +
-      ylab("") +
-      ggtitle("ABV Analysis") +
-      theme_economist()
+        ggplot(mapping = aes(ABV)) +
+        geom_boxplot() +
+        xlab("ABV") +
+        ylab("") +
+        ggtitle("ABV Analysis") +
+        theme_economist()
     }
   })
   
@@ -183,9 +169,5 @@ server <- function(input, output, session) {
       theme_economist()
   })
 }
-```
-
-```{r create shinny app objects from UI/Server pair }
 shinyApp(ui, server)
-```
 
